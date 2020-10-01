@@ -14,6 +14,35 @@ from .constants import (
 
 logger = logging.getLogger("datefinder")
 
+class LocaleParserInfo(parser.parserinfo):
+    """
+    Local infos to take into account the multiple forms for the time
+    """
+
+
+    WEEKDAYS_EN_DE_FR = [("Mon", "Monday",'Mo', 'Montag','Lun','Lundi'),
+                        ("Tue", "Tuesday",'Di', 'Dienstag','Mar','Mardi'),
+                        ("Wed", "Wednesday",'Mi', 'Mittwoch','Mer','Mercredi'),
+                        ("Thu", "Thursday",'Thurs','Do', 'Donnerstag','Jeu','Jeudi'),
+                        ("Fri", "Friday",'Fr', 'Freitag','Ven','Vendredi'),
+                        ("Sat", "Saturday",'Sa', 'Samstag','Sam','Samedi'),
+                        ("Sun", "Sunday",'So', 'Sonntag','Dim','Dimanche')]
+
+    MONTHS_EN_DE_FR  =    [('Jan', 'January', 'Jan', 'Januar','Janv','Janvier'),
+                        ('Feb', 'February', 'Feb', 'Februar','Fev','Février'),
+                        ('Mar', 'March', 'Mär', 'März','Mars'),
+                        ('Apr', 'April', 'Apr', 'April','Avr','Avril'),
+                        ('May', 'May', 'Mai', 'Mai'),
+                        ('Jun', 'June', 'Jun', 'Juni','Jui','Juin'),
+                        ('Jul', 'July', 'Jul', 'Juli','Juil','Juillet'),
+                        ('Aug', 'August', 'Aug', 'August','Aou','Août'),
+                        ('Sep', 'Sept', 'September', 'Sep', 'September','Septembre'),
+                        ('Oct', 'October', 'Okt', 'Oktober','Octobre'),
+                        ('Nov', 'November', 'Nov', 'November','Novembre'),
+                        ('Dec', 'December', 'Dez', 'Dezember','Décembre')]
+
+    WEEKDAYS = WEEKDAYS_EN_DE_FR
+    MONTHS = MONTHS_EN_DE_FR
 
 class DateFinder(object):
     """
@@ -107,11 +136,12 @@ class DateFinder(object):
         try:
             as_dt = parser.parse(
                 date_string,
+                parserinfo=LocaleParserInfo(),
                 default=self.base_date,
                 dayfirst=self.dayfirst,
                 yearfirst=self.yearfirst,
             )
-        except (ValueError, OverflowError):
+        except (TypeError,ValueError, OverflowError):
             # replace tokens that are problematic for dateutil
             date_string, tz_string = self._find_and_replace(date_string, captures)
 
@@ -126,6 +156,7 @@ class DateFinder(object):
                 logger.debug("Parsing {0} with dateutil".format(date_string))
                 as_dt = parser.parse(
                     date_string,
+                    parserinfo=LocaleParserInfo(),
                     default=self.base_date,
                     dayfirst=self.dayfirst,
                     yearfirst=self.yearfirst,
